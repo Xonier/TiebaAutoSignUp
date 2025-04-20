@@ -31,19 +31,27 @@ def tieba_sign_in(tieba_name, tbs, BDUSS):
         cookies=Cookies,
         data=payload,
     )
-
-    if "user_info" in resp.json():
-        logger.debug("签到成功：" + tieba_name + "吧")
-        return True
-    elif resp.json()["error_code"] == "160002":
-        # 已签到
-        logger.error(
-            "签到失败：" + tieba_name + "吧" + " 失败原因：" + resp.json()["error_msg"]
-        )
-    else:
+    
+    try:
+        json_resp = resp.json()
+        if "user_info" in json_resp:
+            logger.debug("签到成功：" + tieba_name + "吧")
+            return True
+        elif json_resp["error_code"] == "160002":
+            # 已签到
+            logger.error(
+                "签到失败：" + tieba_name + "吧" + " 失败原因：" + json_resp["error_msg"]
+            )
+        else:
+            logger.error("签到失败：" + tieba_name + "吧")
+            logger.debug(str(json_resp))
+            logger.error("失败原因：" + json_resp["error_msg"])
+    except Exception as e:
         logger.error("签到失败：" + tieba_name + "吧")
-        logger.debug(str(resp.json()))
-        logger.error("失败原因：" + resp.json()["error_msg"])
+        logger.error("报错：" + str(e))
+        logger.debug("返回数据：" + resp.text)
+        return False
+    
     return False
 
 
